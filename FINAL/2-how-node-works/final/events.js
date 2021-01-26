@@ -1,4 +1,4 @@
-const EventEmitter = require("events");
+const EventEmitter = require("FINAL/2-how-node-works/final/events");
 const http = require("http");
 
 class Sales extends EventEmitter {
