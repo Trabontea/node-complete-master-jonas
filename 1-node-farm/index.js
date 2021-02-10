@@ -37,7 +37,6 @@ const replaceTemplate = require('./modules/replaceTemplate')
 ////////// SERVER
 
 
-
 // synchonisily, read the file
 const data = fs.readFileSync(`${__dirname}/dev-data/data.json`, 'utf-8');
 const tempOverview = fs.readFileSync(`${__dirname}/templates/template-overview.html`, 'utf-8');
@@ -45,15 +44,15 @@ const tempCard = fs.readFileSync(`${__dirname}/templates/template-card.html`, 'u
 const tempProduct = fs.readFileSync(`${__dirname}/templates/template-product.html`, 'utf-8');
 const dataObj = JSON.parse(data);
 
-// create server
+// Create server
 const server = http.createServer((req, res) => {
   // console.log(req.url);
-  //console.log(url.parse(req.url, true))
+  // console.log(url.parse(req.url, true))
   
-  // route
-  // const pathName = req.url;
+  // Route
+  // const pathName = req.url; // old
    const {query, pathname} = url.parse(req.url, true)
-  
+
   // Overview page
   if (pathname === '/' || pathname === '/overview') {
     res.writeHead(200, {'Content-type': 'text/html'});
@@ -61,14 +60,17 @@ const server = http.createServer((req, res) => {
     // add cards on page
     const cardsHTML = dataObj.map(el=> replaceTemplate(tempCard, el)).join('');
     // console.log(cardsHTML)
+
     const outputPage = tempOverview.replace('{%PRODUCT_CARDS%}', cardsHTML)
     res.end(outputPage)
   
   // Product page  
   } else if (pathname === '/product') {
     res.writeHead(200, {'Content-type': 'text/html'});
+
     const product = dataObj[query.id];
     const outputPage = replaceTemplate(tempProduct, product)
+
     res.end(outputPage)
     //console.log(query)
 
