@@ -3,7 +3,8 @@
 const fs = require('fs');
 const http = require('http');
 const url = require('url');
-const replaceTemplate = require('./modules/replaceTemplate')
+const replaceTemplate = require('./modules/replaceTemplate');
+const slugify = require('slugify');
 
 
 ////////////////////////
@@ -33,9 +34,8 @@ const replaceTemplate = require('./modules/replaceTemplate')
 //
 // console.log('will read file ');
 
-/////////////////////////////
+///////////////////////////////////////////
 ////////// SERVER
-
 
 // synchonisily, read the file
 const data = fs.readFileSync(`${__dirname}/dev-data/data.json`, 'utf-8');
@@ -44,23 +44,34 @@ const tempCard = fs.readFileSync(`${__dirname}/templates/template-card.html`, 'u
 const tempProduct = fs.readFileSync(`${__dirname}/templates/template-product.html`, 'utf-8');
 const dataObj = JSON.parse(data);
 
+// create slug for product
+// console.log(slugify('Fresh Avocados', {lower: true}))
+
+// console.log(dataObj)
+// dataObj.forEach(el => {
+//   el.id = slugify(el.productName, {lower: true})
+// })
+
+const slugs = dataObj.map(el => slugify(el.productName, {lower: true}))
+// console.log(slugs);
+
 // Create server
 const server = http.createServer((req, res) => {
   // console.log(req.url);
-  // console.log(url.parse(req.url, true))
-  
-  // Route
   // const pathName = req.url; // old
+
+  // Route
+  // console.log(url.parse(req.url, true))
    const {query, pathname} = url.parse(req.url, true)
+  // console.log('heila',  query, pathname)
 
   // Overview page
   if (pathname === '/' || pathname === '/overview') {
     res.writeHead(200, {'Content-type': 'text/html'});
 
     // add cards on page
-    const cardsHTML = dataObj.map(el=> replaceTemplate(tempCard, el)).join('');
+    const cardsHTML = dataObj.map(el => replaceTemplate(tempCard, el)).join('');
     // console.log(cardsHTML)
-
     const outputPage = tempOverview.replace('{%PRODUCT_CARDS%}', cardsHTML)
     res.end(outputPage)
   
@@ -68,11 +79,12 @@ const server = http.createServer((req, res) => {
   } else if (pathname === '/product') {
     res.writeHead(200, {'Content-type': 'text/html'});
 
+    console.log('dataObj::', dataObj);
     const product = dataObj[query.id];
-    const outputPage = replaceTemplate(tempProduct, product)
+    console.log('query.id' , query.id);
 
+    const outputPage = replaceTemplate(tempProduct, product)
     res.end(outputPage)
-    //console.log(query)
 
   // API  
   } else if (pathname === '/api') {
@@ -82,7 +94,7 @@ const server = http.createServer((req, res) => {
   // not found    
   } else {
     res.writeHead(404, {
-      'Content-type': 'text/html',
+      'Content-type': "text/html",
       'my-own-header': 'Tequilla'
     });
     res.end('<h1>Page not found</h1>')
